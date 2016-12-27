@@ -1,0 +1,6 @@
+1) Should be able to read scores
+2) Should be able to detect players from a score
+3) Should be able to calculate base batting points
+4) Should be able to calculate base bowling points
+5) Should be able to calculate base assistance points
+6) Should be able to calculate total base points
