@@ -23,6 +23,8 @@ public class ScoreBoardTest {
 	private Player zKhan;
 	private Player kohli;
 	private Player dravid;
+	private Player morkel;
+	private Player abd;
 
 	@Before
 	public void setup() {
@@ -34,6 +36,8 @@ public class ScoreBoardTest {
 		pKumar = new Player("P Kumar");
 		kohli = new Player("Virat Kohli");
 		dravid = new Player("Rahul Dravid"); 
+		morkel = new Player("Morne Morkel");
+		abd = new Player("A B Devilliers");
 	}
 
 	@Test
@@ -88,19 +92,19 @@ public class ScoreBoardTest {
 	
 	@Test
 	public void teamRunsIsCorrect() {
-		int teamRuns = match.getTeamRuns();
+		int teamRuns = match.getTeamRuns("Kolkata Knight Riders");
 		assertEquals(21, teamRuns);
 	}
 	
 	@Test
 	public void teamBallsPlayedIsCorrect() {
-		long teamBalls = match.getTeamBalls();
+		long teamBalls = match.getTeamBalls("Kolkata Knight Riders");
 		assertEquals(11, teamBalls);
 	}
 	
 	@Test
 	public void teamStrikeRateIsCorrect() {
-		BigDecimal teamStrikeRate = match.getTeamStrikeRate();
+		BigDecimal teamStrikeRate = match.getTeamStrikeRate("Kolkata Knight Riders");
 		assertEquals("1.91", teamStrikeRate.toPlainString());
 	}
 	
@@ -221,7 +225,7 @@ public class ScoreBoardTest {
 		assertEquals("33.75", matchPoints.toPlainString());
 		
 		matchPoints = match.calculateMatchPoints(kohli);
-		assertEquals("12.5", matchPoints.toPlainString());
+		assertEquals("18.5", matchPoints.toPlainString());
 		
 		matchPoints = match.calculateMatchPoints(dravid);
 		assertEquals("1.0", matchPoints.toPlainString());
@@ -230,7 +234,26 @@ public class ScoreBoardTest {
 	@Test
 	public void manOfMatchIsCorrect() throws Exception {
 		Set<Player> players = match.getManOfMatch();
+		assertEquals("Only one MoM", 1, players.size());
 		Player mom = players.iterator().next();
-		assertEquals(new Player("Z Khan"), mom);
+		assertEquals(zKhan, mom);
 	}
+	
+	@Test
+	public void teamCompositionIsCorrect() throws Exception {
+		Set<Player> players = match.getTeamPlayers("Kolkata Knight Riders");
+		assertEquals("4 KKR players", 4, players.size());
+		assertTrue(players.contains(ganguly));
+		assertTrue(players.contains(mcCullum));
+		assertTrue(players.contains(dravid));
+		assertTrue(players.contains(morkel));
+		
+		players = match.getTeamPlayers("Royal Challengers BLR");
+		System.out.println(players);
+		assertEquals("4 RCB players", 4, players.size());
+		assertTrue(players.contains(zKhan));
+		assertTrue(players.contains(pKumar));
+		assertTrue(players.contains(kohli));
+		assertTrue(players.contains(abd));
+	}	
 }
