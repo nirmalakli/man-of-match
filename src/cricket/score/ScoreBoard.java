@@ -3,8 +3,10 @@ package cricket.score;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import cricket.Player;
@@ -21,13 +23,29 @@ public class ScoreBoard {
 	}
 	
 	public Set<Player> getManOfMatch() {
-		Stream<Set<Player>> players = scores.stream()
-			.map(score -> score.getPlayers());
 		
+		Comparator<Player> pointsComparator = (p1, p2) -> calculateMatchPoints(p2).compareTo(calculateMatchPoints(p1));
 		
-		return null;
-			
-			
+		List<Player> rankings = scores.stream()
+			.flatMap(this::playerStream)
+			.distinct()
+			.sorted(pointsComparator)
+			.collect(Collectors.toList());
+		
+//		System.out.println(rankings);
+		
+		Player firstOne = rankings.get(0);
+		
+		Set<Player> result = rankings
+			.stream()
+			.filter(p -> pointsComparator.compare(firstOne, p) == 0)
+			.collect(Collectors.toSet());
+		
+		return result;
+	}
+	
+	private Stream<Player> playerStream(Score score) {
+		return  score.getPlayers().stream();
 	}
 
 	public BigDecimal calculateBasePoints(Player player) {
@@ -78,6 +96,7 @@ public class ScoreBoard {
 
 	public BigDecimal calculateBaseFieldingPoints(Player player) {
 		return scores.stream()
+			.filter(score -> !score.getAssistingPlayer().isEmpty())
 			.filter(score -> player.equals(new Player(score.getAssistingPlayer())))
 			.map(score ->{
 				if(score.getAssistingPlayer().equals(score.getBowler())) {

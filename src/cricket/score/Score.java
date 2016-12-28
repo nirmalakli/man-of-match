@@ -120,6 +120,7 @@ public class Score {
 		players.add(new Player(batsman));
 		players.add(new Player(bowler));
 		players.add(new Player(nonStriker));
+		players.add(new Player(assistingPlayer));
 		return players;
 	}
 	

@@ -2,6 +2,7 @@ package cricket.score;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -224,5 +225,12 @@ public class ScoreBoardTest {
 		
 		matchPoints = match.calculateMatchPoints(dravid);
 		assertEquals("1.0", matchPoints.toPlainString());
+	}
+	
+	@Test
+	public void manOfMatchIsCorrect() throws Exception {
+		Set<Player> players = match.getManOfMatch();
+		Player mom = players.iterator().next();
+		assertEquals(new Player("Z Khan"), mom);
 	}
 }

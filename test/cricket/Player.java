@@ -39,4 +39,9 @@ public class Player {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("Player (%s)", name);
+	}
+
 }
