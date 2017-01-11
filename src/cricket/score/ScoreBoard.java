@@ -17,6 +17,8 @@ import cricket.Player;
 
 public class ScoreBoard {
 
+	private static final BigDecimal BATTING_BONUS_FACTOR = BigDecimal.valueOf(0.1);
+	private static final BigDecimal BOWLING_BONUS_FACTOR = BigDecimal.valueOf(0.1);
 	private static final BigDecimal NON_ASSIST_BOWLING_POINTS = new BigDecimal(25);
 	private static final BigDecimal ASSIST_BOWLING_POINTS = new BigDecimal(12.5);
 	
@@ -51,12 +53,13 @@ public class ScoreBoard {
 	Set<Player> getTeamPlayers(String teamName) {
 		return Collections.unmodifiableSet(teamComposition.get(teamName));
 	}
+	
 	public Set<Player> getManOfMatch() {
 		
 		Comparator<Player> pointsComparator = (p1, p2) -> calculateMatchPoints(p2).compareTo(calculateMatchPoints(p1));
 		
 		List<Player> rankings = scores.stream()
-			.flatMap(this::playerStream)
+			.flatMap(this::participatingPlayers)
 			.distinct()
 			.sorted(pointsComparator)
 			.collect(Collectors.toList());
@@ -64,17 +67,26 @@ public class ScoreBoard {
 //		System.out.println(rankings);
 		
 		Player firstOne = rankings.get(0);
+	
+		// Find all players having same points as the top player.
+		// There could be more than one player who scores maximum points.
 		
-		Set<Player> result = rankings
+		Set<Player> topRankingPlayers = rankings
 			.stream()
 			.filter(p -> pointsComparator.compare(firstOne, p) == 0)
 			.collect(Collectors.toSet());
 		
-		return result;
+		return topRankingPlayers;
 	}
 	
-	private Stream<Player> playerStream(Score score) {
+	private Stream<Player> participatingPlayers(Score score) {
 		return  score.getPlayers().stream();
+	}
+
+	public BigDecimal calculateMatchPoints(Player player) {
+		
+		return calculateBasePoints(player)
+				.add(calculateBonusPoints(player));
 	}
 
 	public BigDecimal calculateBasePoints(Player player) {
@@ -92,13 +104,6 @@ public class ScoreBoard {
 				.add(calculateBonusBowlingPoints(player));
 	}
 	
-	
-	public BigDecimal calculateMatchPoints(Player player) {
-		
-		return calculateBasePoints(player)
-				.add(calculateBonusPoints(player));
-	}
-
 	public int calculateBaseBattingPoints(Player player) {
 		
 		return scores.stream()
@@ -148,20 +153,22 @@ public class ScoreBoard {
 		
 		BigDecimal diff = playerStrikeRate.subtract(teamStrikeRate);
 		
-		if(diff.signum() == 1) {
-			if(isGreater(diff, teamStrikeRate.multiply(BigDecimal.valueOf(0.1)))) {
-				return calculateBaseBowlingPoints(player).multiply(BigDecimal.valueOf(0.1));
+		if(isPlayerStrikeRateMarkedlyDifferent(diff, teamStrikeRate)) {
+			BigDecimal bonusPoints = new BigDecimal(calculateBaseBattingPoints(player)).multiply(BATTING_BONUS_FACTOR);
+			
+			if(diff.signum() == 1) { // player strike rate is more than team strike rate
+				return bonusPoints;
+			} else {
+				return bonusPoints.negate();
 			}
+		} else {
+			return BigDecimal.ZERO;
 		}
-		
-		if(diff.signum() == -1) {
-			diff = diff.negate();
-			if(isGreater(diff, teamStrikeRate.multiply(BigDecimal.valueOf(0.1)))) {
-				return calculateBaseBowlingPoints(player).multiply(BigDecimal.valueOf(0.1)).negate();
-			}
-		}
-		
-		return BigDecimal.ZERO;
+	}
+
+
+	private Boolean isPlayerStrikeRateMarkedlyDifferent(BigDecimal diff, BigDecimal teamStrikeRate) {
+		return isGreater(diff.abs(), teamStrikeRate.multiply(BATTING_BONUS_FACTOR).abs());
 	}
 	
 	String getTeam(Player player) {
@@ -243,7 +250,6 @@ public class ScoreBoard {
 				.count();
 	}
 
-
 	public int getTeamRuns(String teamName) {
 		return scores.stream()
 				.filter(score -> score.getBattingTeamName().equals(teamName))
@@ -266,15 +272,15 @@ public class ScoreBoard {
 		BigDecimal diff = teamEconomyRate.subtract(playerEconomyRate);
 		
 		if(diff.signum() == 1) {
-			if(isGreater(diff, teamEconomyRate.multiply(BigDecimal.valueOf(0.1)))) {
-				return calculateBaseBowlingPoints(player).multiply(BigDecimal.valueOf(0.1));
+			if(isGreater(diff, teamEconomyRate.multiply(BOWLING_BONUS_FACTOR))) {
+				return calculateBaseBowlingPoints(player).multiply(BOWLING_BONUS_FACTOR);
 			}
 		}
 		
 		if(diff.signum() == -1) {
 			diff = diff.negate();
-			if(isGreater(diff, teamEconomyRate.multiply(BigDecimal.valueOf(0.1)))) {
-				return calculateBaseBowlingPoints(player).multiply(BigDecimal.valueOf(0.1)).negate();
+			if(isGreater(diff, teamEconomyRate.multiply(BOWLING_BONUS_FACTOR))) {
+				return calculateBaseBowlingPoints(player).multiply(BOWLING_BONUS_FACTOR).negate();
 			}
 		}
 		
@@ -307,5 +313,4 @@ public class ScoreBoard {
 				.filter(score -> player.equals(score.getBowler()))
 				.count();
 	}
-	
 }

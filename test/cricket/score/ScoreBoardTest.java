@@ -152,6 +152,9 @@ public class ScoreBoardTest {
 		
 		battingPoints = match.calculateBonusBattingPoints(mcCullum);
 		assertEquals("0", battingPoints.toPlainString());
+		
+		battingPoints = match.calculateBonusBattingPoints(dravid);
+		assertEquals("-0.1", battingPoints.toPlainString());
 	}
 	
 	@Test
@@ -228,7 +231,7 @@ public class ScoreBoardTest {
 		assertEquals("18.5", matchPoints.toPlainString());
 		
 		matchPoints = match.calculateMatchPoints(dravid);
-		assertEquals("1.0", matchPoints.toPlainString());
+		assertEquals("0.9", matchPoints.toPlainString());
 	}
 	
 	@Test

@@ -16,7 +16,7 @@ public class ScoreReaderTest {
 		ScoreReader scoreReader = new ScoreReader("scores.txt");
 		List<Score> scores = scoreReader.getScores();
 		assertNotNull(scores);
-		assertEquals(13, scores.size());
+		assertEquals(14, scores.size());
 		
 		Score score = scores.get(0);
 		assertNotNull(score);
@@ -24,14 +24,14 @@ public class ScoreReaderTest {
 		assertEquals(0, score.getOverNumber());
 		assertEquals(3, score.getBallNumber());
 		assertEquals("Kolkata Knight Riders", score.getBattingTeamName());
-		assertEquals("BB McCullum", score.getBatsman());
-		assertEquals("SC Ganguly", score.getNonStriker());
-		assertEquals("P Kumar", score.getBowler());
+		assertEquals(new Player("BB McCullum"), score.getBatsman());
+		assertEquals(new Player("SC Ganguly"), score.getNonStriker());
+		assertEquals(new Player("P Kumar"), score.getBowler());
 		assertEquals(0, score.getRuns());
 		assertEquals(1, score.getExtraRuns());
 		assertEquals("", score.getKindOfWicket());
-		assertEquals("", score.getDismissedPlayer());
-		assertEquals("", score.getAssistingPlayer());
+		assertFalse(score.getDismissedPlayer().isPresent());
+		assertFalse(score.getAssistingPlayer().isPresent());
 	}
 	
 	
